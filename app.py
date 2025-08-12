@@ -893,13 +893,28 @@ def main():
             # Code metrics
             st.markdown("### 📏 Code Metrics")
             
-            if hasattr(st.session_state, 'project_metrics'):
-                metrics = st.session_state.project_metrics
-                col1, col2, col3, col4 = st.columns(4)
-                col1.metric("Total Files", metrics['total_files'])
-                col2.metric("Total Lines", metrics['total_lines'])
-                col3.metric("Avg Lines/File", metrics['avg_lines_per_file'])
-                col4.metric("Dependencies", metrics['dependencies'])
+            st.markdown("### 📏 Code Metrics")
+           
+           if hasattr(st.session_state, 'project_metrics') and st.session_state.project_metrics:
+               metrics = st.session_state.project_metrics
+               col1, col2, col3, col4 = st.columns(4)
+               col1.metric("Total Files", metrics['total_files'])
+               col2.metric("Total Lines", metrics['total_lines'])
+               col3.metric("Avg Lines/File", metrics['avg_lines_per_file'])
+               col4.metric("Dependencies", metrics['dependencies'])
+           elif st.session_state.current_project:
+               # Fallback calculation if metrics not available
+               project = st.session_state.current_project
+               total_files = len(project['files'])
+               total_lines = sum(len(content.split('\n')) for content in project['files'].values())
+               avg_lines = round(total_lines/total_files) if total_files > 0 else 0
+               dependencies = len(project.get('dependencies', []))
+               
+               col1, col2, col3, col4 = st.columns(4)
+               col1.metric("Total Files", total_files)
+               col2.metric("Total Lines", total_lines)
+               col3.metric("Avg Lines/File", avg_lines)
+               col4.metric("Dependencies", dependencies)
     
     with tab4:
         st.markdown("### 📊 Project Health Dashboard")
