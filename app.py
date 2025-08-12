@@ -575,6 +575,7 @@ def main():
         with col1:
             prompt = st.text_area(
                 "📝 Describe your project:",
+                value=default_prompt,
                 placeholder="Build a REST API for a todo app with user authentication, SQLite database, and CRUD operations",
                 height=120,
                 key="project_prompt"
@@ -588,17 +589,18 @@ def main():
             )
         
         # Template auto-fill
-        if template != "Custom":
-            template_prompts = {
-                "Web App + Auth": "Create a modern web application with user authentication, responsive design, and database integration",
-                "REST API": "Build a RESTful API with CRUD operations, authentication, and comprehensive documentation", 
-                "ML Service": "Create a machine learning inference service with model loading, prediction endpoints, and monitoring",
-                "CLI Tool": "Build a command-line tool with argument parsing, configuration management, and user-friendly output",
-                "Microservice": "Create a microservice with health checks, logging, metrics, and containerization"
-            }
-            if st.session_state.project_prompt != template_prompts.get(template, ""):
-                st.session_state.project_prompt = template_prompts.get(template, "")
-                st.rerun()
+        # Template auto-fill - set default value based on template
+        template_prompts = {
+            "Custom": "",
+            "Web App + Auth": "Create a modern web application with user authentication, responsive design, and database integration",
+            "REST API": "Build a RESTful API with CRUD operations, authentication, and comprehensive documentation", 
+            "ML Service": "Create a machine learning inference service with model loading, prediction endpoints, and monitoring",
+            "CLI Tool": "Build a command-line tool with argument parsing, configuration management, and user-friendly output",
+            "Microservice": "Create a microservice with health checks, logging, metrics, and containerization"
+        }
+        
+        # Set the default prompt value based on template selection
+        default_prompt = template_prompts.get(template, "")
         
         col1, col2 = st.columns(2)
         with col1:
