@@ -801,4 +801,101 @@ def main():
                 deploy_prompt = f"""
                 Generate deployment configuration for {deployment_type} for this project:
                 
-                Project: {project['project_name'
+                Project: {project['project_name']}
+                Language: {language}
+                Dependencies: {project.get('dependencies', [])}
+                Build Commands: {project.get('build_commands', [])}
+                Run Commands: {project.get('run_commands', [])}
+                
+                Include:
+                - Service definitions
+                - Environment variables
+                - Resource limits
+                - Health checks
+                - Networking configuration
+                - Scaling policies
+                - Monitoring setup
+                """
+                
+                with st.spinner(f"Generating {deployment_type} configuration..."):
+                    try:
+                        response = st.session_state.oracle.model.generate_content(deploy_prompt)
+                        deploy_config = response.text
+                        
+                        st.code(deploy_config, language="yaml")
+                        
+                        # Determine file extension based on deployment type
+                        file_extensions = {
+                            "Docker Compose": "docker-compose.yml",
+                            "Kubernetes": "k8s-deployment.yaml", 
+                            "AWS ECS": "ecs-task-definition.json",
+                            "Google Cloud Run": "cloudrun-service.yaml",
+                            "Azure Container Apps": "containerapp.yaml"
+                        }
+                        
+                        filename = file_extensions.get(deployment_type, "deployment.yaml")
+                        
+                        st.download_button(
+                            label=f"📥 Download {deployment_type} Config",
+                            data=deploy_config,
+                            file_name=filename,
+                            mime="text/yaml"
+                        )
+                    except Exception as e:
+                        st.error(f"Deployment configuration generation failed: {str(e)}")
+            
+            # Environment management
+            st.subheader("🔧 Environment Configuration")
+            
+            env_type = st.selectbox(
+                "Environment Type:",
+                ["Development", "Staging", "Production"]
+            )
+            
+            if st.button("Generate Environment Config"):
+                env_prompt = f"""
+                Generate environment configuration for {env_type} environment:
+                
+                Project: {project['project_name']}
+                Language: {language}
+                
+                Include appropriate settings for {env_type}:
+                - Environment variables
+                - Database configurations
+                - Logging levels
+                - Security settings
+                - Performance optimizations
+                - Monitoring configurations
+                """
+                
+                with st.spinner(f"Generating {env_type} environment config..."):
+                    try:
+                        response = st.session_state.oracle.model.generate_content(env_prompt)
+                        env_config = response.text
+                        
+                        st.code(env_config, language="bash")
+                        
+                        st.download_button(
+                            label=f"📥 Download {env_type} Config",
+                            data=env_config,
+                            file_name=f".env.{env_type.lower()}",
+                            mime="text/plain"
+                        )
+                    except Exception as e:
+                        st.error(f"Environment configuration generation failed: {str(e)}")
+
+    # Footer
+    st.markdown("---")
+    st.markdown(
+        """
+        <div style='text-align: center; color: #666; padding: 20px;'>
+            <p>🧙‍♂️ <strong>CodeOracle AI</strong> - Autonomous Software Engineering Assistant</p>
+            <p>Powered by Google Gemini • Built with Streamlit</p>
+            <p><em>From idea to deployment in minutes</em></p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+if __name__ == "__main__":
+    main()
