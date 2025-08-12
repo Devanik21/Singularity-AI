@@ -895,14 +895,14 @@ def main():
             
             st.markdown("### 📏 Code Metrics")
            
-           if hasattr(st.session_state, 'project_metrics') and st.session_state.project_metrics:
+            if hasattr(st.session_state, 'project_metrics') and st.session_state.project_metrics:
                metrics = st.session_state.project_metrics
                col1, col2, col3, col4 = st.columns(4)
                col1.metric("Total Files", metrics['total_files'])
                col2.metric("Total Lines", metrics['total_lines'])
                col3.metric("Avg Lines/File", metrics['avg_lines_per_file'])
                col4.metric("Dependencies", metrics['dependencies'])
-           elif st.session_state.current_project:
+            elif st.session_state.current_project:
                # Fallback calculation if metrics not available
                project = st.session_state.current_project
                total_files = len(project['files'])
