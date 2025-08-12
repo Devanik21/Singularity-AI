@@ -575,7 +575,7 @@ def main():
         with col1:
             prompt = st.text_area(
                 "📝 Describe your project:",
-                value=default_prompt,
+                #value=default_prompt,
                 placeholder="Build a REST API for a todo app with user authentication, SQLite database, and CRUD operations",
                 height=120,
                 key="project_prompt"
