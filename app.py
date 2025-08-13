@@ -99,7 +99,7 @@ h1 {
 }
 
 .stTabs [data-baseweb="tab"][aria-selected="true"] {
-    background: linear-gradient(135deg, #00d4ff, #00ff88);
+    background: linear-gradient(135deg, #00d4ff, #005596);
     color: #000000;
     border: 2px solid #ff00ff;
 }
