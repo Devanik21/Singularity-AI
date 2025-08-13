@@ -118,7 +118,7 @@ h1 {
 }
 
 .stButton > button:hover {
-    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    background: linear-gradient(135deg, #005461, #00cc6a);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
 }
