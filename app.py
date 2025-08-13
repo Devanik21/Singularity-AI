@@ -1033,7 +1033,7 @@ def main():
                 st.checkbox(item, value=False, key=f"security_check_{i}")
     
     with tab6:
-        st.markdown("### 🚀 Deployment & CI/CD")
+        st.markdown("### 🪄 Deployment & CI/CD")
         
         if not st.session_state.current_project:
             st.markdown('<div class="info-box">ℹ️ Generate a project first to see deployment options</div>', unsafe_allow_html=True)
