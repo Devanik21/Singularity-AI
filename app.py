@@ -224,7 +224,7 @@ class CodeOracle:
     def __init__(self, api_key: str):
         self.api_key = api_key
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemma-3n-e4b-it')
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
         self.projects = {}
         
     def generate_project(self, prompt: str, language: str, architecture: str = "standard") -> Dict:
