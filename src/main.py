@@ -74,7 +74,7 @@ def main():
                     st.session_state.project_metrics = {
                         'total_files': len(project_data['files']),
                         'total_lines': total_lines,
-                        'avg_lines_per_file': round(total_lines/len(project_data['files'])),
+                        'avg_lines_per_file': round(total_lines / len(project_data['files'])) if project_data.get('files') else 0,
                         'dependencies': len(project_data.get('dependencies', []))
                     }
                 else:
