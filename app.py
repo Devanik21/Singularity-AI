@@ -7,7 +7,7 @@ import subprocess
 import json
 import time
 import ast
-import re
+import re # IMPROVEMENT: Import the regular expression module
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 import pandas as pd
@@ -230,6 +230,7 @@ class CodeOracle:
     def generate_project(self, prompt: str, language: str, architecture: str = "standard") -> Dict:
         """Generate a complete project from natural language prompt"""
         
+        # IMPROVEMENT: The prompt now asks the AI to wrap the JSON in markdown code blocks for reliable parsing.
         system_prompt = f"""
         You are CodeOracle, an expert software engineer. Generate a complete, production-ready {language} project based on the user's requirements.
         
@@ -247,7 +248,8 @@ class CodeOracle:
         Target Language: {language}
         Architecture Pattern: {architecture}
         
-        Return the response as a JSON object with this exact structure:
+        Return the response as a JSON object inside a markdown code block with this exact structure:
+        ```json
         {{
             "project_name": "project-name",
             "description": "Brief project description",
@@ -264,21 +266,30 @@ class CodeOracle:
             "test_commands": ["test command"],
             "architecture_notes": "explanation of the chosen architecture"
         }}
+        ```
         """
         
         try:
             response = self.model.generate_content(system_prompt)
             
-            # Parse JSON response
-            json_start = response.text.find('{')
-            json_end = response.text.rfind('}') + 1
-            json_str = response.text[json_start:json_end]
-            
+            # IMPROVEMENT: Use regex to find the JSON block, which is more reliable.
+            match = re.search(r"```json\s*(\{.*?\})\s*```", response.text, re.DOTALL)
+            if not match:
+                st.error("Failed to parse the project structure from the AI's response.")
+                # For debugging: show the raw response from the AI
+                st.code(response.text, language="text")
+                return None
+
+            json_str = match.group(1)
             project_data = json.loads(json_str)
             return project_data
             
+        except json.JSONDecodeError as e:
+            st.error(f"Generation failed: Could not decode JSON. Error: {str(e)}")
+            st.code(json_str, language="json") # Show the invalid JSON
+            return None
         except Exception as e:
-            st.error(f"Generation failed: {str(e)}")
+            st.error(f"An unexpected error occurred during generation: {str(e)}")
             return None
     
     def run_tests(self, project_path: str, language: str, test_commands: List[str]) -> Dict:
@@ -321,6 +332,7 @@ class CodeOracle:
     def debug_and_fix(self, project_data: Dict, test_results: Dict, max_iterations: int = 3) -> Dict:
         """Autonomous debugging loop"""
         
+        # IMPROVEMENT: The prompt now asks the AI to wrap the JSON in markdown code blocks.
         debug_prompt = f"""
         The following project has failing tests. Analyze the errors and fix the code:
         
@@ -338,21 +350,26 @@ class CodeOracle:
         3. Logic errors causing test failures
         4. Missing error handling
         
-        Return only the corrected files that need changes in this format:
+        Return only the corrected files that need changes inside a markdown JSON block like this:
+        ```json
         {{
             "fixed_files": {{
                 "filename": "corrected content"
             }},
             "fix_explanation": "What was fixed and why"
         }}
+        ```
         """
         
         try:
             response = self.model.generate_content(debug_prompt)
-            json_start = response.text.find('{')
-            json_end = response.text.rfind('}') + 1
-            json_str = response.text[json_start:json_end]
+
+            # IMPROVEMENT: Use regex for more reliable parsing of the fix data.
+            match = re.search(r"```json\s*(\{.*?\})\s*```", response.text, re.DOTALL)
+            if not match:
+                return {"success": False, "error": "Could not parse the fix from the AI's response."}
             
+            json_str = match.group(1)
             fix_data = json.loads(json_str)
             
             # Apply fixes
