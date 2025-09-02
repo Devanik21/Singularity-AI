@@ -365,7 +365,7 @@ class CodeOracle:
             response = self.model.generate_content(debug_prompt)
 
             # IMPROVEMENT: Use regex for more reliable parsing of the fix data.
-            match = re.search(r"```json\s*(\{.*?\})\s*```", response.text, re.DOTALL)
+            match = re.search(r"```json\s*(.+?)\s*```", response.text, re.DOTALL)
             if not match:
                 return {"success": False, "error": "Could not parse the fix from the AI's response."}
             
