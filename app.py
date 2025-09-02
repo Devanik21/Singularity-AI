@@ -273,7 +273,7 @@ class CodeOracle:
             response = self.model.generate_content(system_prompt)
             
             # IMPROVEMENT: Use regex to find the JSON block, which is more reliable.
-            match = re.search(r"```json\s*(\{.*?\})\s*```", response.text, re.DOTALL)
+            match = re.search(r"```json\s*(.+?)\s*```", response.text, re.DOTALL)
             if not match:
                 st.error("Failed to parse the project structure from the AI's response.")
                 # For debugging: show the raw response from the AI
