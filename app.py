@@ -522,11 +522,66 @@ def init_session_state():
         st.session_state.explanations = {}
     if 'project_metrics' not in st.session_state:
         st.session_state.project_metrics = {}
+    # New authentication states for Singularity-AI app
+    if "singularity_app_authenticated" not in st.session_state:
+        st.session_state.singularity_app_authenticated = False
+    if "singularity_app_login_attempts" not in st.session_state:
+        st.session_state.singularity_app_login_attempts = 0
 
 def main():
     # Initialize session state
     init_session_state()
     
+    # --- START: INITIAL APP PASSWORD PROTECTION ---
+    # Define the maximum number of allowed attempts
+    MAX_APP_ATTEMPTS = 3
+
+    try:
+        # The password should be set in your Streamlit secrets
+        # e.g., in .streamlit/secrets.toml
+        # singularity_app_password = "your_secret_password"
+        correct_app_password = st.secrets["singularity_app_password"]
+    except KeyError:
+        st.error("`singularity_app_password` not found in secrets.toml. Please set it to run the app.")
+        st.stop()
+
+    # If not authenticated for initial app access, show the login screen.
+    if not st.session_state.singularity_app_authenticated:
+        
+        # Check if the user is locked out
+        if st.session_state.singularity_app_login_attempts >= MAX_APP_ATTEMPTS:
+            st.markdown('<div style="text-align: center; margin-top: 100px;">', unsafe_allow_html=True)
+            st.error("🚫 **Access Blocked**")
+            st.warning("Too many incorrect password attempts. Please close and reopen the app to try again.")
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.stop()
+
+        # Display the login form
+        st.markdown('<div style="text-align: center; margin-top: 100px;">', unsafe_allow_html=True)
+        st.markdown("<h2 style='color: #00d4ff;'>Singularity-AI Login</h2>", unsafe_allow_html=True) # Use theme color
+        
+        password_input = st.text_input(
+            "Enter Password",
+            type="password",
+            key="singularity_app_password_input_field",
+            label_visibility="collapsed",
+            placeholder="Enter app password to unlock Singularity-AI"
+        )
+        
+        if st.button("Unlock App", use_container_width=True):
+            if password_input == correct_app_password:
+                st.session_state.singularity_app_authenticated = True
+                st.session_state.singularity_app_login_attempts = 0 # Reset on success
+                st.rerun()
+            else:
+                st.session_state.singularity_app_login_attempts += 1
+                attempts_left = MAX_APP_ATTEMPTS - st.session_state.singularity_app_login_attempts
+                st.error(f"Incorrect password. You have {attempts_left} attempt(s) left.")
+                st.rerun() # Rerun to update the UI and check the lockout condition
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.stop()
+    # --- END: INITIAL APP PASSWORD PROTECTION ---
+
     # Title and header with new theme
     st.markdown('<h1>♾️ Singularity-AI</h1>', unsafe_allow_html=True)
     st.markdown('<div class="subtitle">Where AI meets infinity <span class="infinity">♾️</span></div>', unsafe_allow_html=True)
@@ -534,19 +589,19 @@ def main():
     # Sidebar configuration
     with st.sidebar:
         st.markdown("### ⚙️ Configuration")
-        
-        # API Key input
-        api_key = st.text_input(
-            "🔑 Gemini API Key",
-            type="password",
-            help="Enter your Google Gemini API key",
-            key="api_key_input"
-        )
-        
-        if not api_key:
-            st.error("⚠️ Please enter your Gemini API key to continue")
+
+        # --- Load API Key from secrets (after successful app authentication) ---
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+        except KeyError:
+            st.error("`GEMINI_API_KEY` not found in secrets.toml. Please set it to run the app.")
             st.stop()
-        
+
+        # Display a confirmation that API key is loaded (optional, for user feedback)
+        st.success("🔑 Gemini API Key loaded from secrets.")
+        # --- END API Key Loading ---
+
+
         # Initialize CodeOracle only once
         if st.session_state.oracle is None:
             st.session_state.oracle = CodeOracle(api_key)
